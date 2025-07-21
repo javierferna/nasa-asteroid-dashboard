@@ -77,7 +77,7 @@ hazardous_filter = st.sidebar.selectbox(
 max_distance = st.sidebar.slider(
     "Maximum Miss Distance (million km)",
     min_value=0.05,
-    max_value=50.0,
+    max_value=200.0,
     value=10.0,
     step=0.5
 )
@@ -125,10 +125,18 @@ with col1:
 with col2:
     st.subheader("🎯 Risk Assessment")
     if len(filtered_df) > 0:
-        hazard_counts = filtered_df['is_potentially_hazardous'].value_counts()
-        fig = px.pie(values=hazard_counts.values, 
-                    names=['Safe', 'Potentially Hazardous'],
-                    color_discrete_map={'Safe': '#2ecc71', 'Potentially Hazardous': '#e74c3c'})
+        # Build risk assessment pie chart (always includes both categories)
+        safe_count = (filtered_df['is_potentially_hazardous'] == False).sum()
+        hazardous_count = (filtered_df['is_potentially_hazardous'] == True).sum()
+        values = [safe_count, hazardous_count]
+        labels = ['Safe', 'Potentially Hazardous']
+
+        fig = px.pie(
+            values=values,
+            names=labels,
+            color=labels,
+            color_discrete_map={'Safe': '#2ecc71', 'Potentially Hazardous': '#e74c3c'}
+        )
         st.plotly_chart(fig, use_container_width=True)
 
 # Data table
