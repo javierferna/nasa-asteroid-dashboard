@@ -60,7 +60,7 @@ def load_asteroid_data():
             is_potentially_hazardous,
             min_diameter_km,
             max_diameter_km
-        FROM asteroids
+        FROM nasa_neo_database.asteroids
         WHERE close_approach_date >= date_format(current_date - interval '7' day, '%Y-%m-%d')
     """
     return pd.read_sql(query, conn)
