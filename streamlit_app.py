@@ -43,10 +43,6 @@ st.markdown("""
 st.markdown('<h1 class="main-header">🚀 NASA Asteroid Dashboard</h1>', unsafe_allow_html=True)
 st.markdown("---")
 
-from pyathena import connect
-import pandas as pd
-import streamlit as st
-
 @st.cache_data(ttl=3600)
 def load_asteroid_data():
     # AWS credentials/environment must be set up in Streamlit Cloud
@@ -64,8 +60,8 @@ def load_asteroid_data():
             is_potentially_hazardous,
             min_diameter_km,
             max_diameter_km
-        FROM nasa_asteroids
-        WHERE close_approach_date >= date_format(current_date - interval '10' day, '%Y-%m-%d')
+        FROM asteroids
+        WHERE close_approach_date >= date_format(current_date - interval '7' day, '%Y-%m-%d')
     """
     return pd.read_sql(query, conn)
 
