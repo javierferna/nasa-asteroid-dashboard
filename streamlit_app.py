@@ -4,6 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 from datetime import datetime, timedelta
+from pyathena import connect
 import os
 
 # Set up AWS credentials from Streamlit secrets
