@@ -15,7 +15,7 @@ This repository contains a **serverless, real-time ETL data pipeline and interac
 
 ## 🔧 Pipeline Overview
 
-![Pipeline Overview](nasa_pipeline_overview.png)
+![Pipeline Overview]()
 
 ---
 
