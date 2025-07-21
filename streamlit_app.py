@@ -4,6 +4,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 from datetime import datetime, timedelta
+import os
+
+# Set up AWS credentials from Streamlit secrets
+os.environ['AWS_ACCESS_KEY_ID'] = st.secrets['AWS_ACCESS_KEY_ID']
+os.environ['AWS_SECRET_ACCESS_KEY'] = st.secrets['AWS_SECRET_ACCESS_KEY']
+os.environ['AWS_REGION'] = st.secrets['AWS_REGION']
+
 
 # Page configuration
 st.set_page_config(
@@ -35,29 +42,33 @@ st.markdown("""
 st.markdown('<h1 class="main-header">🚀 NASA Asteroid Dashboard</h1>', unsafe_allow_html=True)
 st.markdown("---")
 
-@st.cache_data
-def load_demo_data():
-    """Load demonstration asteroid data"""
-    dates = pd.date_range(start='2025-07-15', end='2025-07-21', freq='D')
-    
-    asteroids = []
-    for date in dates:
-        num_asteroids = np.random.randint(3, 15)
-        for i in range(num_asteroids):
-            asteroids.append({
-                'close_approach_date': date.strftime('%Y-%m-%d'),
-                'name': f'Asteroid_{date.strftime("%Y%m%d")}_{i+1}',
-                'miss_distance_km': np.random.uniform(50000, 50000000),
-                'velocity_km_s': np.random.uniform(5, 25),
-                'is_potentially_hazardous': np.random.choice([True, False], p=[0.15, 0.85]),
-                'diameter_min_km': np.random.uniform(0.01, 2.0),
-                'diameter_max_km': np.random.uniform(0.02, 4.0)
-            })
-    
-    return pd.DataFrame(asteroids)
+from pyathena import connect
+import pandas as pd
+import streamlit as st
 
-# Load data
-df = load_demo_data()
+@st.cache_data(ttl=3600)
+def load_asteroid_data():
+    # AWS credentials/environment must be set up in Streamlit Cloud
+    conn = connect(
+        s3_staging_dir = "s3://nasa-asteroid-data-1/athena-results/",
+        region_name="us-east-1"  # or your relevant AWS region
+    )
+    query = """
+        SELECT
+            id,
+            name,
+            close_approach_date,
+            miss_distance_km,
+            velocity_km_s,
+            is_potentially_hazardous,
+            min_diameter_km,
+            max_diameter_km
+        FROM nasa_asteroids
+        WHERE close_approach_date >= date_format(current_date - interval '10' day, '%Y-%m-%d')
+    """
+    return pd.read_sql(query, conn)
+
+df = load_asteroid_data()
 
 # Sidebar filters
 st.sidebar.header("🔧 Filters")
