@@ -9,8 +9,8 @@ This repository contains a **serverless, real-time ETL data pipeline and interac
 * 🌐 **Live NASA API Integration:** Automatically fetches daily asteroid data from [NASA NeoWs](https://api.nasa.gov/).
 * 🗃️ **AWS Data Lake Architecture:** Serverless ingestion and storage of raw data to Amazon S3 in Athena-compatible `ndjson` format.
 * 🔍 **Athena SQL Queries:** Analytical queries using Amazon Athena with AWS Glue for schema detection.
-* 📊 **Interactive Dashboard:** View asteroid data by date, risk level, velocity, size and proximity through a [Streamlit Dashboard](https://streamlit.io/).
-* 
+* 📊 **Interactive Dashboard:** View asteroid data by date, risk level, velocity, size and proximity through a custom [Streamlit Dashboard](https://nasa-asteroids.streamlit.app/).
+  
 ---
 
 ## 🔧 Pipeline Overview
@@ -29,3 +29,4 @@ This repository contains a **serverless, real-time ETL data pipeline and interac
 | Query Layer | `Amazon Athena`        | Serverless SQL analytics engine        |
 | Scheduling  | `Amazon EventBridge`   | Daily automated trigger                |
 | Viz/Frontend| `Streamlit Cloud`      | Visual UI for filtering asteroid data  |
+
