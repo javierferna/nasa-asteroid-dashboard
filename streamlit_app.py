@@ -5,6 +5,7 @@ from pyathena import connect
 import os
 from datetime import datetime
 from datetime import timedelta
+import math
 
 # Set up AWS credentials from Streamlit secrets
 os.environ['AWS_ACCESS_KEY_ID'] = st.secrets['AWS_ACCESS_KEY_ID']
@@ -62,6 +63,9 @@ def load_asteroid_data():
 
 df = load_asteroid_data()
 
+# Remove duplicate entries (based on unique ID + date)
+df = df.drop_duplicates(subset=["id", "close_approach_date"])
+
 # Sidebar filters
 st.sidebar.header("🔧 Filters")
 hazardous_filter = st.sidebar.selectbox(
@@ -77,15 +81,25 @@ max_distance = st.sidebar.slider(
     step=0.5
 )
 
-# Add velocity filter
-velocity_min = float(df['velocity_km_s'].min()) if len(df) > 0 else 0.0
-velocity_max = float(df['velocity_km_s'].max()) if len(df) > 0 else 100.0
+if len(df) > 0:
+    # Find true min/max velocities
+    velocity_min = float(df['velocity_km_s'].min())
+    velocity_max = float(df['velocity_km_s'].max())
+    # Clean boundaries to two decimals, fix if they're too close
+    slider_min = math.floor(velocity_min * 100) / 100
+    slider_max = math.ceil(velocity_max * 100) / 100
+    # Guarantee a minimum visible range
+    if slider_max - slider_min < 0.01:
+        slider_max = round(slider_min + 0.01, 2)
+else:
+    slider_min, slider_max = 0.0, 100.0
+
 velocity_range = st.sidebar.slider(
     "Velocity Range (km/s)",
-    min_value=velocity_min,
-    max_value=velocity_max,
-    value=(velocity_min, velocity_max),
-    step=0.1
+    min_value=slider_min,
+    max_value=slider_max,
+    value=(slider_min, slider_max),
+    step=0.01
 )
 
 # User input: Select top N largest asteroids for bar chart
