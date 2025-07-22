@@ -4,6 +4,7 @@ import plotly.express as px
 from pyathena import connect
 import os
 from datetime import datetime
+from datetime import timedelta
 
 # Set up AWS credentials from Streamlit secrets
 os.environ['AWS_ACCESS_KEY_ID'] = st.secrets['AWS_ACCESS_KEY_ID']
@@ -72,8 +73,19 @@ max_distance = st.sidebar.slider(
     "Maximum Miss Distance (million km)",
     min_value=0.0,
     max_value=100.0,
-    value=10.0,
+    value=80.0,
     step=0.5
+)
+
+# Add velocity filter
+velocity_min = float(df['velocity_km_s'].min()) if len(df) > 0 else 0.0
+velocity_max = float(df['velocity_km_s'].max()) if len(df) > 0 else 100.0
+velocity_range = st.sidebar.slider(
+    "Velocity Range (km/s)",
+    min_value=velocity_min,
+    max_value=velocity_max,
+    value=(velocity_min, velocity_max),
+    step=0.1
 )
 
 # User input: Select top N largest asteroids for bar chart
@@ -90,6 +102,10 @@ elif hazardous_filter == "Non-Hazardous":
     filtered_df = filtered_df[filtered_df['is_potentially_hazardous'] == False]
 
 filtered_df = filtered_df[filtered_df['miss_distance_km'] <= max_distance * 1_000_000]
+filtered_df = filtered_df[
+    (filtered_df['velocity_km_s'] >= velocity_range[0]) &
+    (filtered_df['velocity_km_s'] <= velocity_range[1])
+]
 
 # Metrics
 col1, col2, col3, col4 = st.columns(4)
@@ -187,8 +203,13 @@ if len(filtered_df) > 0:
         use_container_width=True
     )
 
+# Footer with data refresh time
+@st.cache_data(ttl=3600)
+def get_data_refresh_time():
+    return datetime.now()
+
 st.markdown("---")
 st.markdown("**Data Source:** NASA Near Earth Object Web Service | **Built with:** Streamlit + AWS")
-st.markdown("**Last Updated:** " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+st.markdown("**Last Data Refresh:** " + get_data_refresh_time().strftime("%Y-%m-%d %H:%M:%S"))
 st.markdown("---")
 st.markdown("© 2025 Javier Fernández. All rights reserved.")
