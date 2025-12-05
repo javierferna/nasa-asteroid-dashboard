@@ -1,0 +1,5 @@
+# Ignore local environment files
+.env
+
+# Ignore streamlit settings
+.streamlit/
