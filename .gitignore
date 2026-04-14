@@ -3,3 +3,6 @@
 
 # Ignore streamlit settings
 .streamlit/
+
+# Ignore drawings
+.drawio/
